@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Labeler</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    #upload-section, #annotation-section {
+      margin: 20px auto;
+      max-width: 600px;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+    }
+    #image-preview {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 10px;
+    }
+    label, select, button {
+      display: block;
+      margin-top: 15px;
+      width: 100%;
+    }
+    select, button {
+      padding: 10px;
+    }
+    #output {
+      white-space: pre-wrap;
+      background: #efefef;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Smart Labeler</h1>
+  <div id="upload-section">
+    <input type="file" id="image-upload" accept="image/*" />
+    <img id="image-preview" src="" alt="Image Preview" style="display:none;" />
+  </div>
+
+  <div id="annotation-section" style="display:none;">
+    <label for="label">Choose Label:</label>
+    <select id="label">
+      <option value="cat">Cat</option>
+      <option value="dog">Dog</option>
+      <option value="car">Car</option>
+      <option value="tree">Tree</option>
+    </select>
+    <button onclick="saveAnnotation()">Save Annotation</button>
+    <button onclick="downloadJSON()">Download Annotations</button>
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const imageUpload = document.getElementById('image-upload');
+    const imagePreview = document.getElementById('image-preview');
+    const annotationSection = document.getElementById('annotation-section');
+    const output = document.getElementById('output');
+
+    const annotations = [];
+
+    imageUpload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          imagePreview.src = reader.result;
+          imagePreview.style.display = 'block';
+          annotationSection.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function saveAnnotation() {
+      const label = document.getElementById('label').value;
+      annotations.push({
+        image: imagePreview.src,
+        label: label
+      });
+      output.textContent = JSON.stringify(annotations, null, 2);
+    }
+
+    function downloadJSON() {
+      const blob = new Blob([JSON.stringify(annotations, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'annotations.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
